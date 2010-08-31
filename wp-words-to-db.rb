@@ -28,10 +28,8 @@ def unmarkup(wtext)
       gsub(/<[^>]+>/) {|tag| ''}.strip.gsub(/\n+/,"\n")
 end
 def unmarkedup
-  redirect = "<redirect />"
   text = /<text.+<\/text>/m
   w {|wpage|
-    #next if wpage.include?(redirect)
     pagetext = wpage[text]
     next if pagetext.nil?
     unmarkedup = unmarkup(pagetext)
@@ -42,6 +40,7 @@ def make_sql
   word_id_autoincrement = 0
   corpus_id_autoincrement = 0
   word_id = Hash.new {|h,k| h[k] = word_id_autoincrement += 1 }
+  File.read('top_1000_words.txt').scan(/\w+/, &word_id.method(:[])) if File.exist?('top_1000_words.txt')
   article_id = 0
   puts "begin;"
   unmarkedup {|text|
@@ -50,11 +49,13 @@ def make_sql
       w = word_id[word]
       corpus_id_autoincrement += 1
       print "insert into corpus_words values (#{corpus_id_autoincrement},#{article_id},#{w});\n"
-      STDERR.print "." if corpus_id_autoincrement.%(10_000_000).zero?
+      (print 'commit;begin;'; STDERR.print ".") if corpus_id_autoincrement.%(10_000_000).zero?
     }
   }
-  STDERR.puts "corpus_words done"
-  puts "commit;begin;"  
+  puts "commit;"
+  STDERR.puts `wget -q --output-document=- lsb.nfshost.com/tellme.php`
+  puts "begin;"  
   word_id.sort_by {|k,v| v}.each {|k,v| print "insert into words values (#{v},'#{k}');\n" }
   puts "commit;"
 end
+
