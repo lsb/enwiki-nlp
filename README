@@ -1,4 +1,9 @@
 These are some tools I've found helpful to churn through Wikipedia.
+
+The wp-words-to-db will run through the xml of a pages-articles.xml.bz2 dump.
+The meta-to-page-linewise will take a pages-meta-historz.xml.7z and produce a (page, revision, page, revision) set of xml shard quadruples.
+The page-linewise-to-inserts will then make insert statements for revisions with diff-sizes.
+
 Copyright (C) 2010 Lee Butterman, released under GPL v2,
 available at http://www.gnu.org/licenses/ .
 
